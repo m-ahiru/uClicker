@@ -76,7 +76,7 @@ In the same file, update this line:
 
 To find the correct trigger code:
 - Run `sudo evtest`
-- Press your desired mouse/keyboard button
+- Press your desired mouse button
 - Copy the code number from the output
 
 ---
