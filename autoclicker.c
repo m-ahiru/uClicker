@@ -15,16 +15,14 @@ volatile int clicking = 0;
 
 void emit_click(int fd) {
     struct input_event ev = {0};
-
-    // Press
+ 
     ev.type = EV_KEY; ev.code = BTN_LEFT; ev.value = 1;
     write(fd, &ev, sizeof(ev));
     ev.type = EV_SYN; ev.code = SYN_REPORT; ev.value = 0;
     write(fd, &ev, sizeof(ev));
 
-    usleep(10000); // gedrückt halten
+    usleep(10000); 
 
-    // Release
     ev.type = EV_KEY; ev.code = BTN_LEFT; ev.value = 0;
     write(fd, &ev, sizeof(ev));
     ev.type = EV_SYN; ev.code = SYN_REPORT; ev.value = 0;
@@ -55,13 +53,12 @@ int setup_uinput() {
 
 void* click_thread(void* arg) {
     int uinput_fd = *(int*)arg;
-    srand(time(NULL)); // Initialisiere Zufall
+    srand(time(NULL)); 
 
     while (1) {
         if (clicking) {
             emit_click(uinput_fd);
 
-            // Zufallswartezeit: 52.6ms – 62.5ms → 52600 – 62500 µs
             int delay = (rand() % (62500 - 52600 + 1)) + 52600;
             usleep(delay);
         } else {
