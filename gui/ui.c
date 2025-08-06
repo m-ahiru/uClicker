@@ -119,7 +119,7 @@ void launch_ui() {
 
     // Reference/Link
     GtkWidget *footer = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(footer), "Made by <a href=\"https://github.com/mahiru-placeholder\">Mahiru</a>");
+    gtk_label_set_markup(GTK_LABEL(footer), "Made by <a href=\"https://www.youtube.com/@mahiru404l\">Mahiru</a>");
     gtk_label_set_xalign(GTK_LABEL(footer), 0.5);
     gtk_grid_attach(GTK_GRID(grid), footer, 0, 6, 3, 1);
 
