@@ -52,6 +52,7 @@ make
 ```
 
 This compiles both the backend (`autoclicker_backend`) and the GUI frontend (`uClicker`).
+Getting error messages at this part is *normal* just continue with the next steps.
 
 ---
 
