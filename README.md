@@ -3,7 +3,7 @@
 **uClicker** is a fast, undetectable, and minimal universal Linux autoclicker with a clean GTK-based GUI.  
 It interacts directly with `/dev/input/` for raw device access, making it fully **Wayland-compatible**, and perfect for use cases like **Minecraft PvP** or **automation**.
 
-![Screenshot](assets/screenshot.png)
+![Screenshot](assets/ss.png)
 
 ---
 
