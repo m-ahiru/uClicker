@@ -4,16 +4,15 @@
 #include <stdio.h>
 #include "config.h"
 
-static GtkWidget *min_cps_spin, *max_cps_spin, *trigger_entry, *event_entry;
+static GtkWidget *min_cps_slider, *max_cps_slider, *trigger_entry, *event_entry;
 
 void on_exit_cleanup() {
     system("sudo pkill -f autoclicker_backend");
 }
 
 void on_save_clicked(GtkButton *button, gpointer user_data) {
-    printf("[DEBUG] Save button clicked\n");
-    int min_cps = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(min_cps_spin));
-    int max_cps = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(max_cps_spin));
+    int min_cps = (int)gtk_range_get_value(GTK_RANGE(min_cps_slider));
+    int max_cps = (int)gtk_range_get_value(GTK_RANGE(max_cps_slider));
     if (min_cps > max_cps) {
         printf("[ERROR] min_cps > max_cps\n");
         return;
@@ -46,63 +45,76 @@ void launch_ui() {
     GtkWidget *window, *grid, *save_btn, *start_btn, *stop_btn;
     gtk_init(NULL, NULL);
 
-    // Window setup
+    // Window
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "uClicker");
-    gtk_window_set_default_size(GTK_WINDOW(window), 300, 300);
     gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
-    gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DIALOG);
     gtk_window_set_keep_above(GTK_WINDOW(window), TRUE);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    // CSS Provider
+    // HeaderBar (CSD)
+    GtkWidget *header_bar = gtk_header_bar_new();
+    gtk_header_bar_set_title(GTK_HEADER_BAR(header_bar), "uClicker");
+    gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header_bar), TRUE);
+    gtk_window_set_titlebar(GTK_WINDOW(window), header_bar);
+
+    // CSS Styling
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_data(provider,
-        "* {"
-        "   background-color: #ffffff;"     // Eierschalenfarbe
-        "   color: black;"
-        "   font-weight: normal;"
-        "   font-size: 12pt;"
-        "}"
-        "button {"
-        "   margin: 5px;"
-        "}"
-        "label, entry, spinbutton {"
-        "   margin: 3px;"
-        "}", -1, NULL);
-    GtkStyleContext *context = gtk_widget_get_style_context(window);
-    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
-        GTK_STYLE_PROVIDER(provider),
-        GTK_STYLE_PROVIDER_PRIORITY_USER);
+                                    "* { background-color: #ffffff; color: black; font-size: 12pt; }"
+                                    "scale slider { background-color: #007BFF; border-radius: 4px; }"
+                                    "scale trough { background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; min-height: 8px; }"
+                                    "button { margin: 4px; }"
+                                    "label, entry, scale { margin: 2px; }"
+                                    "headerbar { background-color: #f7f7f7; border-bottom: 1px solid #ddd; }"
+                                    "headerbar title { color: #333333; font-weight: bold; }",
+                                    -1, NULL);
+    gtk_style_context_add_provider_for_screen(
+        gdk_screen_get_default(),
+                                              GTK_STYLE_PROVIDER(provider),
+                                              GTK_STYLE_PROVIDER_PRIORITY_USER
+    );
 
     // Layout
     grid = gtk_grid_new();
-    gtk_grid_set_row_spacing(GTK_GRID(grid), 6);
-    gtk_grid_set_column_spacing(GTK_GRID(grid), 6);
-    gtk_container_set_border_width(GTK_CONTAINER(grid), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 4);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 4);
+    gtk_container_set_border_width(GTK_CONTAINER(grid), 6);
     gtk_container_add(GTK_CONTAINER(window), grid);
 
     // Logo
-    GtkWidget *logo = gtk_image_new_from_file("assets/logo.png");
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale("assets/logo.png", 120, 40, TRUE, NULL);
+    GtkWidget *logo = gtk_image_new_from_pixbuf(pixbuf);
     gtk_grid_attach(GTK_GRID(grid), logo, 0, 0, 3, 1);
 
-    // Widgets
-    min_cps_spin = gtk_spin_button_new_with_range(1, 1000, 1);
-    max_cps_spin = gtk_spin_button_new_with_range(1, 1000, 1);
+    // Sliders
+    GtkAdjustment *min_adj = gtk_adjustment_new(1, 1, 40, 1, 5, 0);
+    GtkAdjustment *max_adj = gtk_adjustment_new(1, 1, 40, 1, 5, 0);
+    min_cps_slider = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, min_adj);
+    max_cps_slider = gtk_scale_new(GTK_ORIENTATION_HORIZONTAL, max_adj);
+
+    gtk_scale_set_draw_value(GTK_SCALE(min_cps_slider), TRUE);
+    gtk_scale_set_draw_value(GTK_SCALE(max_cps_slider), TRUE);
+    gtk_scale_set_value_pos(GTK_SCALE(min_cps_slider), GTK_POS_RIGHT);
+    gtk_scale_set_value_pos(GTK_SCALE(max_cps_slider), GTK_POS_RIGHT);
+    gtk_scale_set_digits(GTK_SCALE(min_cps_slider), 0);
+    gtk_scale_set_digits(GTK_SCALE(max_cps_slider), 0);
+
+    // Text Inputs
     trigger_entry = gtk_entry_new();
     event_entry = gtk_entry_new();
 
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(min_cps_spin), 1000000 / MAX_DELAY_US);
-    gtk_spin_button_set_value(GTK_SPIN_BUTTON(max_cps_spin), 1000000 / MIN_DELAY_US);
-
+    gtk_range_set_value(GTK_RANGE(min_cps_slider), 1000000 / MAX_DELAY_US);
+    gtk_range_set_value(GTK_RANGE(max_cps_slider), 1000000 / MIN_DELAY_US);
     char trigger_str[10]; sprintf(trigger_str, "%d", TRIGGER_CODE);
     gtk_entry_set_text(GTK_ENTRY(trigger_entry), trigger_str);
     gtk_entry_set_text(GTK_ENTRY(event_entry), MOUSE_EVENT_PATH);
 
+    // Attach to Grid
     gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Min CPS:"), 0, 1, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), min_cps_spin, 1, 1, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), min_cps_slider, 1, 1, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Max CPS:"), 0, 2, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), max_cps_spin, 1, 2, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), max_cps_slider, 1, 2, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Trigger Code:"), 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), trigger_entry, 1, 3, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Mouse Event:"), 0, 4, 1, 1);
@@ -112,23 +124,27 @@ void launch_ui() {
     save_btn = gtk_button_new_with_label("Save Config");
     start_btn = gtk_button_new_with_label("Start");
     stop_btn = gtk_button_new_with_label("Stop");
-
     gtk_grid_attach(GTK_GRID(grid), save_btn, 0, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), start_btn, 1, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), stop_btn, 2, 5, 1, 1);
 
-    // Reference/Link
+    // Footer
     GtkWidget *footer = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(footer), "Made by <a href=\"https://www.youtube.com/@mahiru404l\">Mahiru</a>");
+    gtk_label_set_markup(GTK_LABEL(footer),
+                         "Made by <a href=\"https://www.youtube.com/@mahiru404l\">"
+                         "<span foreground=\"#007BFF\"><b>Mahiru</b></span></a>");
     gtk_label_set_xalign(GTK_LABEL(footer), 0.5);
+    gtk_label_set_selectable(GTK_LABEL(footer), TRUE);
     gtk_grid_attach(GTK_GRID(grid), footer, 0, 6, 3, 1);
 
-    // Button callbacks
+    // Callbacks
     g_signal_connect(save_btn, "clicked", G_CALLBACK(on_save_clicked), NULL);
     g_signal_connect(start_btn, "clicked", G_CALLBACK(on_start_clicked), NULL);
     g_signal_connect(stop_btn, "clicked", G_CALLBACK(on_stop_clicked), NULL);
 
+    // Show window and enforce compact size
     gtk_widget_show_all(window);
+    gtk_window_resize(GTK_WINDOW(window), 300, 240);  // final enforced size
+
     gtk_main();
 }
-

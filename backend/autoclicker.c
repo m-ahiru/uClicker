@@ -87,10 +87,6 @@ int main() {
         if (read(mouse_fd, &ev, sizeof(ev)) == sizeof(ev)) {
             if (ev.type == EV_KEY && ev.code == TRIGGER_CODE) {
                 clicking = ev.value;
-                if (clicking)
-                    printf("⏺️  Start\n");
-                else
-                    printf("⏹️  Stop\n");
             }
         }
     }
