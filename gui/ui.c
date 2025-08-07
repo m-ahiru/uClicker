@@ -20,29 +20,20 @@ static void on_exit_cleanup(void) {
 static void on_save_clicked(GtkButton *button, gpointer user_data) {
     int min_cps = (int)gtk_range_get_value(GTK_RANGE(min_cps_slider));
     int max_cps = (int)gtk_range_get_value(GTK_RANGE(max_cps_slider));
-    if (min_cps > max_cps) {
-        printf("[ERROR] min_cps > max_cps\n");
-        return;
-    }
-
+    if (min_cps > max_cps) return;
     MIN_DELAY_US = 1000000 / max_cps;
     MAX_DELAY_US = 1000000 / min_cps;
-
     TRIGGER_CODE = atoi(gtk_entry_get_text(GTK_ENTRY(trigger_entry)));
     strncpy(MOUSE_EVENT_PATH, gtk_entry_get_text(GTK_ENTRY(event_entry)), sizeof(MOUSE_EVENT_PATH));
-
     system("sudo pkill -f autoclicker_backend");
     save_config();
-
     set_status("Autoclicker Stopped", "red");
 }
 
 static void on_start_clicked(GtkButton *button, gpointer user_data) {
     on_save_clicked(NULL, NULL);
-
     system("sudo pkill -f autoclicker_backend");
     system("sudo HOME=$HOME ./autoclicker_backend &");
-
     set_status("Autoclicker Running", "green");
 }
 
@@ -72,13 +63,23 @@ void launch_ui(void) {
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_data(
         provider,
-        "* { background-color: #ffffff; color: black; font-size: 12pt; }"
+        "window { background-color: #ffffff; }"
+        "* { color: black; font-size: 12pt; background-color: transparent; }"
         "scale slider { background-color: #007BFF; border-radius: 4px; }"
         "scale trough { background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; min-height: 8px; }"
-        "button { margin: 4px; }"
-        "label, entry, scale { margin: 2px; }"
+        "label, entry, scale { margin: 2px; background-color: transparent; }"
         "headerbar { background-color: #f7f7f7; border-bottom: 1px solid #ddd; }"
-        "headerbar title { color: #333333; font-weight: bold; }",
+        "headerbar title { color: #333333; font-weight: bold; }"
+        "button {"
+        "margin: 4px;"
+        "background-color: #007BFF;"
+        "color: white;"
+        "border-radius: 8px;"
+        "padding: 6px 12px;"
+        "}"
+        "button:hover {"
+        "background-color: #0069d9;"
+        "}",
         -1, NULL
     );
     gtk_style_context_add_provider_for_screen(
@@ -135,8 +136,8 @@ void launch_ui(void) {
     gtk_grid_attach(GTK_GRID(grid), stop_btn,  2, 5, 1, 1);
 
     status_label = gtk_label_new(NULL);
-    gtk_label_set_xalign(GTK_LABEL(status_label), 0.0);
-    set_status("Autoclicker Stopped", "red"); // Initialer Status
+    gtk_label_set_xalign(GTK_LABEL(status_label), 0.5);
+    set_status("Autoclicker Stopped", "red");
     gtk_grid_attach(GTK_GRID(grid), status_label, 0, 6, 3, 1);
 
     GtkWidget *footer = gtk_label_new(NULL);
