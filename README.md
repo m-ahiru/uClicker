@@ -88,8 +88,7 @@ sudo sh -c 'cat >/etc/udev/rules.d/99-uinput.rules << "EOF"
 ```
 ```   
 KERNEL=="uinput", MODE="0660", GROUP="input"
-KERNEL=="event*", SUBSYSTEM=="input", MODE="0640", GROUP="input"
-EOF'  
+KERNEL=="event*", SUBSYSTEM=="input", MODE="0640", GROUP="input"  
 ```
 ```bash
 sudo udevadm control --reload  
