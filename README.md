@@ -22,17 +22,25 @@ It interacts directly with `/dev/input/` for raw device access, making it fully 
 
 You’ll need:
 
-- `gtk3`
-- `gcc`
-- `make`
-- `evtest` (for identifying input devices)
-- `sudo` (to access `/dev/input/`)
+- `gtk3` (for the GUI)
+- `gcc` & `make` (for building)
+- `pkg-config` (for detecting GTK and other libs during build)
+- `evtest` (optional, for identifying input devices)
+- `sudo` **or** udev rules that give your user access to `/dev/input/*` and `/dev/uinput` (recommended for running without root)
+- *(Optional)* `libevdev` development package if you implement automatic device discovery later
+
+> **Note:** On minimal installations you may also need a complete build toolchain package such as `base-devel` (Arch) or `build-essential` (Debian/Ubuntu).
 
 ### 🐧 Install on Arch Linux:
+sudo pacman -S --needed base-devel pkgconf gtk3 evtest
 
-```bash
-sudo pacman -S gtk3 base-devel evtest
-```
+### 🐧 Install on Debian/Ubuntu:
+sudo apt update
+sudo apt install build-essential pkg-config libgtk-3-dev evtest
+
+### 🐧 Install on Fedora:
+sudo dnf install @development-tools pkgconf-pkg-config gtk3-devel evtest
+
 
 ---
 
