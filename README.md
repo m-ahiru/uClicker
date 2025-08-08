@@ -76,37 +76,37 @@ Getting error messages at this part is *normal* just continue with the next step
 By default, only root can read `/dev/input/event*` and write to `/dev/uinput`.  
 To run uClicker as a normal user:
 
-1. Add your user to the `input` group
-   ```bash
-   sudo usermod -aG input $USER
-   ```  
-   Log out and back in afterwards.
+### 1. Add your user to the `input` group
+```bash
+sudo usermod -aG input $USER
+```  
+Log out and back in afterwards.
 
-3. Create udev rules
-   ```bash
-   sudo sh -c 'cat >/etc/udev/rules.d/99-uinput.rules << "EOF"
-   ```
+### 3. Create udev rules
+```bash
+sudo sh -c 'cat >/etc/udev/rules.d/99-uinput.rules << "EOF"
+```
 ```   
 KERNEL=="uinput", MODE="0660", GROUP="input"
 KERNEL=="event*", SUBSYSTEM=="input", MODE="0640", GROUP="input"
 EOF'  
 ```
 ```bash
-   sudo udevadm control --reload  
-   sudo udevadm trigger
+sudo udevadm control --reload  
+sudo udevadm trigger
 ```
 
-5. Load `uinput` (and persist across reboots)
-   ```bash 
-   sudo modprobe uinput  
-   echo uinput | sudo tee /etc/modules-load.d/uinput.conf >/dev/null
-   ```
+### 5. Load `uinput` (and persist across reboots)
+```bash 
+sudo modprobe uinput  
+echo uinput | sudo tee /etc/modules-load.d/uinput.conf >/dev/null
+```
 
-7. Verify devices
-   ```bash
-   ls -l /dev/uinput /dev/input/event*  
-   ```
-   # Group should be 'input', permissions should allow group rw for uinput and r for event*
+### 7. Verify devices
+```bash
+ls -l /dev/uinput /dev/input/event*  
+```
+# Group should be 'input', permissions should allow group rw for uinput and r for event*
 
 Now you can run the backend without sudo.
 
