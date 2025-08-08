@@ -36,13 +36,13 @@ You’ll need:
 sudo pacman -S --needed base-devel pkgconf gtk3 evtest
 ```
 
-### 🐧 Install on Debian/Ubuntu:
+### 📀 Install on Debian/Ubuntu:
 ```bash
 sudo apt update
 sudo apt install build-essential pkg-config libgtk-3-dev evtest
 ```
 
-### 🐧 Install on Fedora:
+### 🧢 Install on Fedora:
 ```bash
 sudo dnf install @development-tools pkgconf-pkg-config gtk3-devel evtest
 ```
