@@ -151,7 +151,7 @@ chmod 600 ~/.config/uClicker/uClicker.conf
 **Check permissions:**
 ```bash
 stat -c '%U:%G %a %n' ~/.config/uClicker ~/.config/uClicker/uClicker.conf
-test -w ~/.config/uClicker/uClicker.conf && echo "schreibbar" || echo "NICHT schreibbar"
+test -w ~/.config/uClicker/uClicker.conf && echo "writable" || echo "NOT writable"
 ```
 If owner is not you, run the `chown` fix above.
 
