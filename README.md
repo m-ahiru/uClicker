@@ -125,8 +125,8 @@ Quick checks:
 # Should show your username and proper perms
 stat -c '%U:%G %a %n' ~/.config/uClicker ~/.config/uClicker/uClicker.conf
 
-# Should say "schreibbar"
-test -w ~/.config/uClicker/uClicker.conf && echo "schreibbar" || echo "NICHT schreibbar"
+# Should say "writable"
+test -w ~/.config/uClicker/uClicker.conf && echo "writable" || echo "NOT writable"
 ```
 
 If you ever launched the GUI with sudo and broke ownership again:
