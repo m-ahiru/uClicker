@@ -1,7 +1,7 @@
-# uClicker
+# uClicker (GTK UI)
 
-**uClicker** is a fast, undetectable, and minimal universal Linux autoclicker with a clean GTK-based GUI.  
-It interacts directly with `/dev/input/` for raw device access, making it fully **Wayland-compatible**, and perfect for use cases like **Minecraft PvP** or **automation**.
+**uClicker** is a fast, minimal Linux autoclicker with a clean GTK-based GUI.  
+It interacts directly with `/dev/input/` for raw device access, making it fully **Wayland-compatible** and perfect for use cases like **Minecraft PvP** or **automation**.
 
 ![Screenshot](assets/ss.png)
 
@@ -25,173 +25,165 @@ You’ll need:
 - `gtk3` (for the GUI)
 - `gcc` & `make` (for building)
 - `pkg-config` (for detecting GTK and other libs during build)
-- `evtest` (optional, for identifying input devices)
-- `sudo` **or** udev rules that give your user access to `/dev/input/*` and `/dev/uinput` (recommended for running without root)
-- *(Optional)* `libevdev` development package if you implement automatic device discovery later
+- `evtest` (optional, to identify input devices)
+- *(Optional, recommended)* udev rules + `input` group membership to run backend without sudo
 
-> **Note:** On minimal installations you may also need a complete build toolchain package such as `base-devel` (Arch) or `build-essential` (Debian/Ubuntu).
+> On minimal installs you may also need a build toolchain like `base-devel` (Arch) or `build-essential` (Debian/Ubuntu).
 
-### 🐧 Install on Arch Linux:
+### Arch Linux
 ```bash
 sudo pacman -S --needed base-devel pkgconf gtk3 evtest
 ```
 
-### 📀 Install on Debian/Ubuntu:
+### Debian/Ubuntu
 ```bash
 sudo apt update
 sudo apt install build-essential pkg-config libgtk-3-dev evtest
 ```
 
-### 🧢 Install on Fedora:
+### Fedora
 ```bash
 sudo dnf install @development-tools pkgconf-pkg-config gtk3-devel evtest
 ```
 
-
-
 ---
 
-## 🚀 Installation
-
-### 1. Clone the repo
+## 🚀 Build (gtk-ui branch)
 
 ```bash
-git clone https://github.com/m-ahiru/uClicker.git
+git clone -b gtk-ui https://github.com/m-ahiru/uClicker.git
 cd uClicker
-```
-
-### 2. Build the app
-
-```bash
 make
 ```
 
-This compiles both the backend (`autoclicker_backend`) and the GUI frontend (`uClicker`).
-Getting error messages at this part is *normal* just continue with the next steps.
-
----
-
-## 🚫 Run Without sudo (recommended)
-
-By default, only root can read `/dev/input/event*` and write to `/dev/uinput`.  
-To run uClicker as a normal user:
-
-### 1. Add your user to the `input` group
-```bash
-sudo usermod -aG input $USER
-```  
-Log out and back in afterwards.
-
-### 3. Create udev rules
-```bash
-sudo sh -c 'cat >/etc/udev/rules.d/99-uinput.rules << "EOF"
-```
-```   
-KERNEL=="uinput", MODE="0660", GROUP="input"
-KERNEL=="event*", SUBSYSTEM=="input", MODE="0640", GROUP="input"  
-```
-```bash
-sudo udevadm control --reload  
-sudo udevadm trigger
-```
-
-### 5. Load `uinput` (and persist across reboots)
-```bash 
-sudo modprobe uinput  
-echo uinput | sudo tee /etc/modules-load.d/uinput.conf >/dev/null
-```
-
-### 7. Verify devices
-```bash
-ls -l /dev/uinput /dev/input/event*  
-```
-# Group should be 'input', permissions should allow group rw for uinput and r for event*
-
-Now you can run the backend without sudo.
+This builds the GUI (`uClicker`) and backend (`autoclicker_backend`).  
+Some warnings are fine—continue with the next steps.
 
 ---
 
 ## ▶️ Usage
 
-### Step 1: Find your mouse event path
-
-Run:
-
+### 1) Find your mouse event path
 ```bash
 sudo evtest
 ```
+Pick your mouse; note the event path (e.g. `/dev/input/event7`), and put it into the GUI or the config.
 
-Then select your mouse and note the event path  
-(e.g. `/dev/input/event7`)
-
----
-
-### Step 2: Start the GUI
-
+### 2) Start the GUI
 ```bash
 ./uClicker
 ```
+- Set Min/Max CPS
+- Enter trigger key code (e.g. 275 for BTN_SIDE)
+- Set `mouse_event_path` (e.g. `/dev/input/event7`)
+- **Save Config**
+- Start/Stop the backend
 
-> The GUI runs as your normal user and lets you:
-> - Set your CPS range (Min/Max)
-> - Enter your trigger key code
-> - Set the mouse event path
-> - Save your config
-> - Start or stop the backend clicker
-
-When you press your chosen trigger key (e.g. `F6`), the backend will start clicking in your desired CPS range.
-
----
-
-## 🔧 Backend Details
-
-The backend binary is `autoclicker_backend`  
-It requires `sudo` because it reads from `/dev/input/`
-
-The GUI handles backend control by:
-- Saving your settings
-- Killing old backend instances
-- Launching a fresh one with updated config
+> The GUI runs as your normal user. Avoid launching it with `sudo`.
 
 ---
 
 ## 💾 Config File
 
-Config is saved at:
-
+Location:
 ```
 ~/.config/uClicker/uClicker.conf
 ```
 
 Example:
-
 ```
 min_delay_us=55555
-max_delay_us=62500
+max_delay_us=83333
 trigger_code=275
 mouse_event_path=/dev/input/event7
 ```
 
 ---
 
-## 🛑 Stop Everything
+**Recommended: run backend without sudo (so config stays user-owned):**
+```bash
+# Add your user to input group
+sudo usermod -aG input "$USER"
 
-Clicking **"Stop"** in the UI will kill the backend.
-Exiting the GUI also automatically stops it.
+# Allow access to /dev/uinput and /dev/input/event*
+sudo tee /etc/udev/rules.d/99-uinput.rules > /dev/null <<'EOF'
+KERNEL=="uinput", MODE="0660", GROUP="input"
+KERNEL=="event*", SUBSYSTEM=="input", MODE="0640", GROUP="input"
+EOF
+sudo udevadm control --reload
+sudo udevadm trigger
+
+# Load uinput now and on boot
+sudo modprobe uinput
+echo uinput | sudo tee /etc/modules-load.d/uinput.conf >/dev/null
+
+# Re-login (or reboot) so your group membership takes effect
+```
+
+Quick checks:
+```bash
+# Should show your username and proper perms
+stat -c '%U:%G %a %n' ~/.config/uClicker ~/.config/uClicker/uClicker.conf
+
+# Should say "schreibbar"
+test -w ~/.config/uClicker/uClicker.conf && echo "schreibbar" || echo "NICHT schreibbar"
+```
+
+If you ever launched the GUI with sudo and broke ownership again:
+```bash
+sudo chown -R "$USER":"$USER" ~/.config/uClicker
+```
 
 ---
 
-## 🧠 Important Notes
+## 🛠 Troubleshooting
 
-- The app **must be run from the project root** (`./uClicker`) so the logo/screenshot assets are found.
-- The backend runs with `sudo`, but config and GTK stay in user context.
+**Problem:** *Config file exists but doesn’t update when clicking “Save”*  
+**Cause:** File or folder belongs to `root` (often happens if backend runs with sudo first).  
+**Fix:**
+```bash
+sudo chown -R "$USER":"$USER" ~/.config/uClicker
+chmod 700 ~/.config/uClicker
+chmod 600 ~/.config/uClicker/uClicker.conf
+```
+
+**Problem:** *GUI can read config but not write*  
+**Check permissions:**
+```bash
+stat -c '%U:%G %a %n' ~/.config/uClicker ~/.config/uClicker/uClicker.conf
+test -w ~/.config/uClicker/uClicker.conf && echo "schreibbar" || echo "NICHT schreibbar"
+```
+If owner is not you, run the `chown` fix above.
+
+**Problem:** *Still breaks after using sudo*  
+Don’t run the GUI with sudo. Prefer running backend without sudo via the udev rules above.
+
+**Problem:** *Where does the app actually read/write?*  
+Trace file openings to confirm the exact path:
+```bash
+strace -e openat ./uClicker 2>&1 | grep uClicker.conf
+```
+
+**Problem:** *Which key code is my trigger?*  
+Use `evtest` and press your desired button to see the code.
+
+---
+
+## 🛑 Stop Everything
+
+- Use the **Stop** button in the GUI to kill the backend.
+- Exiting the GUI also stops the backend automatically.
+
+---
+
+## 🧠 Notes
+
+- Run the GUI from the project root so assets load (`./uClicker`).
+- If you keep using sudo for the backend, make sure it never touches the config path.
 
 ---
 
 ## ❗ Disclaimer
 
-This tool is provided for **educational and personal use only**.  
-Using autoclickers in online games may **violate terms of service**.  
-Use responsibly and at your own risk.
-
----
+This tool is for **educational/personal use** only.  
+Using autoclickers in online games may **violate terms of service**. Use responsibly.
