@@ -49,6 +49,7 @@ void load_config() {
         printf("[INFO] No config file found at %s\n", path);
 	system("mkdir ~/.config/uClicker");
 	system("touch ~/.config/uClicker/uClicker.conf");
+	system("chown -R $USER:$USER ~/.config/uClicker");
         return;
     }
     fscanf(file, "min_delay_us=%d\n", &MIN_DELAY_US);
