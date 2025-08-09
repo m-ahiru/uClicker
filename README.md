@@ -100,35 +100,6 @@ mouse_event_path=/dev/input/event7
 
 ---
 
-**Recommended: run backend without sudo (so config stays user-owned):**
-```bash
-# Add your user to input group
-sudo usermod -aG input "$USER"
-
-# Allow access to /dev/uinput and /dev/input/event*
-sudo tee /etc/udev/rules.d/99-uinput.rules > /dev/null <<'EOF'
-KERNEL=="uinput", MODE="0660", GROUP="input"
-KERNEL=="event*", SUBSYSTEM=="input", MODE="0640", GROUP="input"
-EOF
-sudo udevadm control --reload
-sudo udevadm trigger
-
-# Load uinput now and on boot
-sudo modprobe uinput
-echo uinput | sudo tee /etc/modules-load.d/uinput.conf >/dev/null
-
-# Re-login (or reboot) so your group membership takes effect
-```
-
-Quick checks:
-```bash
-# Should show your username and proper perms
-stat -c '%U:%G %a %n' ~/.config/uClicker ~/.config/uClicker/uClicker.conf
-
-# Should say "writable"
-test -w ~/.config/uClicker/uClicker.conf && echo "writable" || echo "NOT writable"
-```
-
 If you ever launched the GUI with sudo and broke ownership again:
 ```bash
 sudo chown -R "$USER":"$USER" ~/.config/uClicker
@@ -156,7 +127,7 @@ test -w ~/.config/uClicker/uClicker.conf && echo "writable" || echo "NOT writabl
 If owner is not you, run the `chown` fix above.
 
 **Problem:** *Still breaks after using sudo*  
-Don’t run the GUI with sudo. Prefer running backend without sudo via the udev rules above.
+Don’t run the GUI with sudo.
 
 **Problem:** *Where does the app actually read/write?*  
 Trace file openings to confirm the exact path:
