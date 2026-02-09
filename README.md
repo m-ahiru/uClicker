@@ -1,22 +1,12 @@
 # uClicker (GTK UI)
 
 **uClicker** is a fast, minimal Linux autoclicker with a clean GTK-based GUI.  
-It interacts directly with `/dev/input/` for raw device access, making it fully **Wayland-compatible** and perfect for use cases like **Minecraft PvP** or **automation**.
+It writes raw events directly to `/dev/uinput` at the kernel layer, generating real hardware-level clicks instead of simulated userspace events, making it compositor-agnostic and fully Wayland-safe.
 
 ![Screenshot](assets/ss.png)
 
 ---
 
-## ⚙️ Features
-
-- 🖱️ **Raw input** device access via `/dev/input/eventX`
-- 🔑 Customizable **trigger key**
-- ⚡ Adjustable **CPS range**
-- 🧠 Undetectable by most anti-cheats
-- 🧩 Works under **Wayland** and **X11**
-- 💾 Config is saved to `~/.config/uClicker/uClicker.conf`
-
----
 
 ## 📦 Dependencies
 
