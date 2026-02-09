@@ -1,7 +1,7 @@
 # uClicker (GTK UI)
 
 **uClicker** is a fast, minimal Linux autoclicker with a clean GTK-based GUI.  
-It writes raw events directly to `/dev/uinput` at the kernel layer, generating real hardware-level clicks instead of simulated userspace events, making it compositor-agnostic and fully Wayland-safe.
+It writes raw events directly to `/dev/uinput/` at the kernel layer, generating real hardware-level clicks instead of simulated userspace events, making it compositor-agnostic and fully Wayland-safe.
 
 ![Screenshot](assets/ss.png)
 
